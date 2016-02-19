@@ -1,0 +1,51 @@
+<!doctype html>
+<head>
+    <title>A-frame demo: Planet</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/vendor/aframe.min.js"></script>
+</head>
+<body class="demo">
+    <a-scene>
+        <a-light color="white" position="0 0 0" type="point" intensity="2"></a-light>
+        <a-camera cursor position="0 0 0"></a-camera>
+        <a-sky src="images/stars.jpg"></a-sky>
+        <a-entity id="earth-and-moon">
+            <a-entity position="0 0 -5">
+                <a-entity id="earth">
+                    <a-sphere radius="1"
+                        position="0 0 0"
+                        rotation="0 0 0"
+                        src="images/earth.png">
+                    </a-sphere>
+                    <a-animation attribute="rotation"
+                        to="0 360 0"
+                        dur="4000"
+                        easing="linear"
+                        repeat="indefinite"></a-animation>
+                </a-entity>
+
+                <a-entity id="moon">
+                    <a-sphere radius="0.2" color="white" position="-3 0 0"
+                        src="images/moon.jpg">
+                        <a-animation attributes="rotation"
+                            to="0 360 0"
+                            dur="4000"
+                            easing="linear"
+                            repeat="indefinite"></a-animation>
+                    </a-sphere>
+                    <a-animation attribute="rotation"
+                        to="0 360 0"
+                        dur="112000"
+                        easing="linear"
+                        repeat="indefinite"></a-animation>
+                </a-entity>
+            </a-entity>
+            <a-animation attribute="rotation"
+                to="0 360 0"
+                dur="100000"
+                easing="linear"
+                repeat="indefinite"></a-animation>
+        </a-entity>
+    </a-scene>
+</body>
