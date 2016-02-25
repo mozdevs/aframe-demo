@@ -1,5 +1,9 @@
 'use strict';
 
+function radians(degrees) {
+    return degrees * Math.PI / 180;
+}
+
 const NOTES = {
     'C4': 261.63,
     'D4': 293.66,
@@ -18,19 +22,28 @@ const NOTE_DUR = 1; // seconds
 function ChundaChunda(ctx) {
     this.ctx = ctx;
     this.volumeNode = this.ctx.createGain();
-    this.volumeNode.gain.value = 0.5;
+    this.volumeNode.gain.value = 1;
     this.volumeNode.connect(this.ctx.destination);
 }
 
-ChundaChunda.prototype.play = function (freq, duration) {
+ChundaChunda.prototype.play = function (freq, duration, position, orientation) {
+    this.ctx.listener.setOrientation(
+        orientation.x, orientation.y, orientation.z,
+        0, 1, 0);
+
     const START_TIME = this.ctx.currentTime;
     const END_TIME = START_TIME + duration;
 
     let gain = this.ctx.createGain();
     let osc = this.ctx.createOscillator();
+    let panner = this.ctx.createPanner();
+
+    panner.setPosition(position.x, position.y, position.z);
+    panner.connect(this.volumeNode);
 
     gain.gain.setValueAtTime(1, START_TIME);
-    gain.connect(this.volumeNode);
+    gain.connect(panner);
+
     osc.type = 'sine';
     osc.frequency.value = freq;
     osc.connect(gain);
@@ -45,22 +58,30 @@ window.onload = function () {
     let instrument = new ChundaChunda(ctx);
 
     let lastNoteTime = ctx.currentTime;
+    var i = 0;
     let loop = function () {
         let timestamp = ctx.currentTime;
         if (timestamp - lastNoteTime > NOTE_DUR) {
             let note = NOTE_NAMES[Math.floor(Math.random() * NOTE_NAMES.length)];
-            instrument.play(NOTES[note], NOTE_DUR);
+            // let note = NOTE_NAMES[i];
+            // i = (i + 1) % NOTE_NAMES.length;
+            let speaker = document.querySelector(`#${note.toLowerCase()}`);
+            speaker.emit('play');
+
+            let position = speaker.getAttribute('position');
+            let rotY = document.querySelector('#camera')
+                .getAttribute('rotation').y;
+            let orientation = {
+                x: Math.cos(radians(rotY) + Math.PI/2),
+                y: 0,
+                z: -Math.sin(radians(rotY) + Math.PI/2)
+            };
+
+            instrument.play(NOTES[note], NOTE_DUR, position, orientation);
             lastNoteTime = timestamp;
-            document.querySelector(`#${note.toLowerCase()}`).emit('play');
         }
         requestAnimationFrame(loop);
     };
 
     loop();
-
-    // document.getElementById('play').addEventListener('click', function () {
-    //     ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'].forEach(function (note, index) {
-    //         instrument.play(NOTES[note], index, 1);
-    //     });
-    // }, false);
 };
