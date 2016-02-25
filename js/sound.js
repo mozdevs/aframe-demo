@@ -22,30 +22,41 @@ function ChundaChunda(ctx) {
     this.volumeNode.connect(this.ctx.destination);
 }
 
-ChundaChunda.prototype.play = function (freq, init, duration) {
-    let osc = this.ctx.createOscillator();
-    osc.frequency.value = freq;
-    osc.connect(this.volumeNode);
+ChundaChunda.prototype.play = function (freq, duration) {
+    const START_TIME = this.ctx.currentTime;
+    const END_TIME = START_TIME + duration;
 
-    osc.start(this.ctx.currentTime + init);
-    osc.stop(this.ctx.currentTime + init + duration);
+    let gain = this.ctx.createGain();
+    let osc = this.ctx.createOscillator();
+
+    gain.gain.setValueAtTime(1, START_TIME);
+    gain.connect(this.volumeNode);
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc.connect(gain);
+
+    osc.start(START_TIME);
+    osc.stop(END_TIME);
+    gain.gain.linearRampToValueAtTime(0, END_TIME - duration * 0.1);
 };
 
 window.onload = function () {
-    let instrument = new ChundaChunda(new AudioContext());
+    let ctx = new AudioContext();
+    let instrument = new ChundaChunda(ctx);
 
-    let lastNoteTime = performance.now();
-    let play = function (timestamp) {
-        if (timestamp - lastNoteTime > NOTE_DUR * 1000) {
+    let lastNoteTime = ctx.currentTime;
+    let loop = function () {
+        let timestamp = ctx.currentTime;
+        if (timestamp - lastNoteTime > NOTE_DUR) {
             let note = NOTE_NAMES[Math.floor(Math.random() * NOTE_NAMES.length)];
-            instrument.play(NOTES[note], 0, NOTE_DUR);
+            instrument.play(NOTES[note], NOTE_DUR);
             lastNoteTime = timestamp;
             document.querySelector(`#${note.toLowerCase()}`).emit('play');
         }
-        requestAnimationFrame(play);
+        requestAnimationFrame(loop);
     };
 
-    requestAnimationFrame(play);
+    loop();
 
     // document.getElementById('play').addEventListener('click', function () {
     //     ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'].forEach(function (note, index) {
