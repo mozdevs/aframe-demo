@@ -17,7 +17,7 @@ const NOTES = {
 
 const NOTE_NAMES = Object.keys(NOTES);
 
-const NOTE_DUR = 1; // seconds
+const NOTE_DUR = 2; // seconds
 
 function ChundaChunda(ctx) {
     this.ctx = ctx;
@@ -63,10 +63,8 @@ window.onload = function () {
         let timestamp = ctx.currentTime;
         if (timestamp - lastNoteTime > NOTE_DUR) {
             let note = NOTE_NAMES[Math.floor(Math.random() * NOTE_NAMES.length)];
-            // let note = NOTE_NAMES[i];
-            // i = (i + 1) % NOTE_NAMES.length;
             let speaker = document.querySelector(`#${note.toLowerCase()}`);
-            speaker.emit('play');
+            speaker.emit('sound');
 
             let position = speaker.getAttribute('position');
             let rotY = document.querySelector('#camera')
